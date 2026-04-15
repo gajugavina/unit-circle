@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unit Circle Two-Level Game</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #eef2ff, #f8fafc);
+      color: #1f2937;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .app {
+      max-width: 1150px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 22px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+      padding: 24px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+    .subtitle {
+      color: #475569;
+      margin-bottom: 18px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+    .stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      background: #e0e7ff;
+      color: #312e81;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: bold;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      background: #4f46e5;
+      color: white;
+      font-weight: bold;
+    }
+    button.secondary {
+      background: #0f172a;
+    }
+    button.active {
+      outline: 3px solid #c7d2fe;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 22px;
+    }
+    .panel {
+      background: #f8fafc;
+      border-radius: 18px;
+      padding: 18px;
+    }
+    .panel h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 1.35rem;
+    }
+    .helper {
+      color: #475569;
+      margin-bottom: 16px;
+      line-height: 1.45;
+    }
+    .study-note {
+      background: white;
+      border-radius: 16px;
+      padding: 14px;
+      line-height: 1.6;
+      color: #334155;
+      min-height: 108px;
+    }
+    .quiz-box {
+      background: white;
+      border-radius: 18px;
+      padding: 18px;
+      border: 2px dashed #a5b4fc;
+    }
+    .question-title {
+      font-size: 1.15rem;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .coord-display {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #312e81;
+      text-align: center;
+      margin: 12px 0 18px;
+      word-break: break-word;
+    }
+    .form-row {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      max-width: 240px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 2px solid #cbd5e1;
+      font-size: 1rem;
+    }
+    .radian-inputs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tiny {
+      width: 90px;
+    }
+    .fraction-bar {
+      width: 46px;
+      border-top: 2px solid #111827;
+      margin-top: 2px;
+    }
+    .fraction-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .pi-badge {
+      background: #ede9fe;
+      color: #5b21b6;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: bold;
+      min-width: 46px;
+      text-align: center;
+    }
+    .message {
+      min-height: 30px;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    .correct { color: #166534; }
+    .wrong { color: #b91c1c; }
+    canvas {
+      width: 100%;
+      max-width: 430px;
+      display: block;
+      margin: 0 auto;
+      background: white;
+      border-radius: 50%;
+      touch-action: manipulation;
+    }
+    .legend {
+      margin-top: 14px;
+      background: white;
+      border-radius: 14px;
+      padding: 12px;
+      line-height: 1.5;
+      color: #334155;
+    }
+    .hidden {
+      display: none;
+    }
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Unit Circle Memory Game</h1>
+    <div class="subtitle">Level 1 lets you hover on the actual circle. Level 2 checks degrees and radians from coordinates. Level 3 makes you click the matching point.</div>
+
+    <div class="topbar">
+      <div class="stats">
+        <div class="pill" id="levelDisplay">Level: 1</div>
+        <div class="pill" id="scoreDisplay">Score: 0</div>
+        <div class="pill" id="questionDisplay">Question: 1</div>
+      </div>
+      <div class="controls" style="margin-bottom:0;">
+        <button id="level1Btn" class="active">Level 1</button>
+        <button id="level2Btn" class="secondary">Level 2</button>
+        <button id="level3Btn" class="secondary">Level 3</button>
+        <button id="resetBtn">Reset</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="panel">
+        <div id="level1Panel">
+          <h2>Level 1: Hover on the Circle</h2>
+          <div class="helper">Move your mouse over the actual points on the unit circle. When you hover near a point, its degree, radian, and coordinate appear. When your mouse moves away, the info hides again.</div>
+          <div class="study-note" id="level1InfoBox">
+            Hover over any point on the circle to reveal its information.
+          </div>
+        </div>
+
+        <div id="level2Panel" class="hidden">
+          <h2>Level 2: Write the Angle</h2>
+          <div class="helper">Look at the coordinate and enter the matching degree and radian. For radians, π is already shown, so you only type the numerator and denominator. For 0, just enter 0.</div>
+          <div class="quiz-box">
+            <div class="question-title">What angle matches this coordinate?</div>
+            <div class="coord-display" id="coordQuestion">(√3/2, 1/2)</div>
+
+            <div class="form-row">
+              <label for="degreeInput">Degree</label>
+              <input id="degreeInput" type="text" placeholder="Example: 30 or 180" />
+            </div>
+
+            <div class="form-row">
+              <label>Radian</label>
+              <div id="radianNormal" class="radian-inputs">
+                <div class="fraction-wrap">
+                  <input id="numInput" class="tiny" type="text" placeholder="top" />
+                  <div class="fraction-bar"></div>
+                  <input id="denInput" class="tiny" type="text" placeholder="bottom" />
+                </div>
+                <div class="pi-badge">π</div>
+              </div>
+              <div id="radianZero" class="hidden">
+                <input id="zeroInput" type="text" placeholder="Enter 0" />
+              </div>
+            </div>
+
+            <div class="controls" style="margin-top: 12px;">
+              <button id="submitBtn">Submit Answer</button>
+              <button id="nextBtn" class="secondary">Next Question</button>
+            </div>
+
+            <div class="message" id="quizMessage"></div>
+          </div>
+        </div>
+
+        <div id="level3Panel" class="hidden">
+          <h2>Level 3: Click the Point</h2>
+          <div class="helper">The game gives you an angle. Click the matching point on the unit circle.</div>
+          <div class="quiz-box">
+            <div class="question-title">Click the point for this prompt:</div>
+            <div class="coord-display" id="level3Prompt">150°</div>
+            <div class="controls" style="margin-top: 12px;">
+              <button id="nextLevel3Btn" class="secondary">Next Prompt</button>
+            </div>
+            <div class="message" id="level3Message"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Unit Circle</h2>
+        <canvas id="circleCanvas" width="430" height="430"></canvas>
+        <div class="legend" id="legendBox">
+          Hover over a point on the circle to reveal its angle information.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const unitCircleData = [
+      { deg: '0', rad: '0', coord: '(1, 0)', x: 1, y: 0, num: '', den: '', usePi: false },
+      { deg: '30', rad: 'π/6', coord: '(√3/2, 1/2)', x: Math.sqrt(3)/2, y: 1/2, num: '1', den: '6', usePi: true },
+      { deg: '45', rad: 'π/4', coord: '(√2/2, √2/2)', x: Math.sqrt(2)/2, y: Math.sqrt(2)/2, num: '1', den: '4', usePi: true },
+      { deg: '60', rad: 'π/3', coord: '(1/2, √3/2)', x: 1/2, y: Math.sqrt(3)/2, num: '1', den: '3', usePi: true },
+      { deg: '90', rad: 'π/2', coord: '(0, 1)', x: 0, y: 1, num: '1', den: '2', usePi: true },
+      { deg: '120', rad: '2π/3', coord: '(-1/2, √3/2)', x: -1/2, y: Math.sqrt(3)/2, num: '2', den: '3', usePi: true },
+      { deg: '135', rad: '3π/4', coord: '(-√2/2, √2/2)', x: -Math.sqrt(2)/2, y: Math.sqrt(2)/2, num: '3', den: '4', usePi: true },
+      { deg: '150', rad: '5π/6', coord: '(-√3/2, 1/2)', x: -Math.sqrt(3)/2, y: 1/2, num: '5', den: '6', usePi: true },
+      { deg: '180', rad: 'π', coord: '(-1, 0)', x: -1, y: 0, num: '1', den: '1', usePi: true },
+      { deg: '210', rad: '7π/6', coord: '(-√3/2, -1/2)', x: -Math.sqrt(3)/2, y: -1/2, num: '7', den: '6', usePi: true },
+      { deg: '225', rad: '5π/4', coord: '(-√2/2, -√2/2)', x: -Math.sqrt(2)/2, y: -Math.sqrt(2)/2, num: '5', den: '4', usePi: true },
+      { deg: '240', rad: '4π/3', coord: '(-1/2, -√3/2)', x: -1/2, y: -Math.sqrt(3)/2, num: '4', den: '3', usePi: true },
+      { deg: '270', rad: '3π/2', coord: '(0, -1)', x: 0, y: -1, num: '3', den: '2', usePi: true },
+      { deg: '300', rad: '5π/3', coord: '(1/2, -√3/2)', x: 1/2, y: -Math.sqrt(3)/2, num: '5', den: '3', usePi: true },
+      { deg: '315', rad: '7π/4', coord: '(√2/2, -√2/2)', x: Math.sqrt(2)/2, y: -Math.sqrt(2)/2, num: '7', den: '4', usePi: true },
+      { deg: '330', rad: '11π/6', coord: '(√3/2, -1/2)', x: Math.sqrt(3)/2, y: -1/2, num: '11', den: '6', usePi: true }
+    ];
+
+    let level = 1;
+    let score = 0;
+    let questionNumber = 1;
+    let currentQuestion = null;
+    let currentLevel3 = null;
+
+    const levelDisplay = document.getElementById('levelDisplay');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const questionDisplay = document.getElementById('questionDisplay');
+    const level1Panel = document.getElementById('level1Panel');
+    const level2Panel = document.getElementById('level2Panel');
+    const level3Panel = document.getElementById('level3Panel');
+    const level1InfoBox = document.getElementById('level1InfoBox');
+    const coordQuestion = document.getElementById('coordQuestion');
+    const degreeInput = document.getElementById('degreeInput');
+    const numInput = document.getElementById('numInput');
+    const denInput = document.getElementById('denInput');
+    const zeroInput = document.getElementById('zeroInput');
+    const radianNormal = document.getElementById('radianNormal');
+    const radianZero = document.getElementById('radianZero');
+    const quizMessage = document.getElementById('quizMessage');
+    const level3Prompt = document.getElementById('level3Prompt');
+    const level3Message = document.getElementById('level3Message');
+    const legendBox = document.getElementById('legendBox');
+    const canvas = document.getElementById('circleCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function updateStats() {
+      levelDisplay.textContent = `Level: ${level}`;
+      scoreDisplay.textContent = `Score: ${score}`;
+      questionDisplay.textContent = `Question: ${questionNumber}`;
+    }
+
+    function drawCircle(highlight = null) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const r = 155;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#1e293b';
+
+      ctx.beginPath();
+      ctx.moveTo(cx, 30);
+      ctx.lineTo(cx, h - 30);
+      ctx.moveTo(30, cy);
+      ctx.lineTo(w - 30, cy);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.font = '15px Arial';
+      ctx.fillStyle = '#334155';
+      ctx.fillText('(1,0)', cx + r - 5, cy - 10);
+      ctx.fillText('(-1,0)', cx - r - 55, cy - 10);
+      ctx.fillText('(0,1)', cx + 10, cy - r + 16);
+      ctx.fillText('(0,-1)', cx + 10, cy + r - 2);
+
+      unitCircleData.forEach(item => {
+        const px = cx + item.x * r;
+        const py = cy - item.y * r;
+        ctx.beginPath();
+        ctx.fillStyle = '#64748b';
+        ctx.arc(px, py, 6, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      if (highlight) {
+        const px = cx + highlight.x * r;
+        const py = cy - highlight.y * r;
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#4f46e5';
+        ctx.lineWidth = 3;
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.fillStyle = '#4f46e5';
+        ctx.arc(px, py, 9, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function setLevel(nextLevel) {
+      level = nextLevel;
+      document.getElementById('level1Btn').classList.toggle('active', level === 1);
+      document.getElementById('level2Btn').classList.toggle('active', level === 2);
+      document.getElementById('level3Btn').classList.toggle('active', level === 3);
+
+      level1Panel.classList.toggle('hidden', level !== 1);
+      level2Panel.classList.toggle('hidden', level !== 2);
+      level3Panel.classList.toggle('hidden', level !== 3);
+
+      if (level === 1) {
+        drawCircle();
+        legendBox.innerHTML = 'Hover over a point on the circle to reveal its angle information.';
+        level1InfoBox.innerHTML = 'Hover over any point on the circle to reveal its information.';
+      } else if (level === 2) {
+        nextQuestion();
+      } else {
+        nextLevel3Question();
+      }
+      updateStats();
+    }
+
+    function nextQuestion() {
+      currentQuestion = shuffle(unitCircleData)[0];
+      coordQuestion.textContent = currentQuestion.coord;
+      degreeInput.value = '';
+      numInput.value = '';
+      denInput.value = '';
+      zeroInput.value = '';
+      quizMessage.textContent = '';
+      quizMessage.className = 'message';
+
+      if (currentQuestion.usePi) {
+        radianNormal.classList.remove('hidden');
+        radianZero.classList.add('hidden');
+      } else {
+        radianNormal.classList.add('hidden');
+        radianZero.classList.remove('hidden');
+      }
+
+      drawCircle(currentQuestion);
+      legendBox.innerHTML = `<b>Coordinate:</b> ${currentQuestion.coord}<br>Type the matching degree and radian.`;
+      updateStats();
+    }
+
+    function normalize(value) {
+      return value.trim().replace(/°/g, '');
+    }
+
+    function submitAnswer() {
+      const degGuess = normalize(degreeInput.value);
+      const degreeCorrect = degGuess === currentQuestion.deg;
+      let radianCorrect = false;
+
+      if (!currentQuestion.usePi) {
+        radianCorrect = normalize(zeroInput.value) === '0';
+      } else {
+        const numGuess = normalize(numInput.value);
+        const denGuess = normalize(denInput.value);
+        radianCorrect = numGuess === currentQuestion.num && denGuess === currentQuestion.den;
+      }
+
+      if (degreeCorrect && radianCorrect) {
+        score += 10;
+        quizMessage.textContent = `Correct! ${currentQuestion.coord} matches ${currentQuestion.deg}° and ${currentQuestion.rad}.`;
+        quizMessage.className = 'message correct';
+      } else {
+        quizMessage.textContent = `Not quite. The correct answer is ${currentQuestion.deg}° and ${currentQuestion.rad}.`;
+        quizMessage.className = 'message wrong';
+      }
+
+      questionNumber += 1;
+      updateStats();
+    }
+
+    function nextLevel3Question() {
+      currentLevel3 = shuffle(unitCircleData)[0];
+      const promptOptions = [currentLevel3.deg + '°', currentLevel3.rad, currentLevel3.coord];
+      level3Prompt.textContent = shuffle(promptOptions)[0];
+      level3Message.textContent = '';
+      level3Message.className = 'message';
+      drawCircle();
+      legendBox.innerHTML = 'Click the point on the circle that matches the prompt.';
+      updateStats();
+    }
+
+    function getCirclePointFromMouse(event) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mouseX = (event.clientX - rect.left) * scaleX;
+      const mouseY = (event.clientY - rect.top) * scaleY;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const r = 155;
+
+      for (const item of unitCircleData) {
+        const px = cx + item.x * r;
+        const py = cy - item.y * r;
+        const distance = Math.hypot(mouseX - px, mouseY - py);
+        if (distance <= 14) return item;
+      }
+      return null;
+    }
+
+    function handleCanvasHover(event) {
+      if (level !== 1) return;
+      const hoveredItem = getCirclePointFromMouse(event);
+      if (hoveredItem) {
+        drawCircle(hoveredItem);
+        legendBox.innerHTML = `<b>Showing:</b> ${hoveredItem.deg}° = ${hoveredItem.rad}<br>Coordinate: ${hoveredItem.coord}`;
+        level1InfoBox.innerHTML = `<b>Degree:</b> ${hoveredItem.deg}°<br><b>Radian:</b> ${hoveredItem.rad}<br><b>Coordinate:</b> ${hoveredItem.coord}`;
+        canvas.style.cursor = 'pointer';
+      } else {
+        drawCircle();
+        legendBox.innerHTML = 'Hover over a point on the circle to reveal its angle information.';
+        level1InfoBox.innerHTML = 'Hover over any point on the circle to reveal its information.';
+        canvas.style.cursor = 'default';
+      }
+    }
+
+    function handleCanvasLeave() {
+      if (level !== 1) return;
+      drawCircle();
+      legendBox.innerHTML = 'Hover over a point on the circle to reveal its angle information.';
+      level1InfoBox.innerHTML = 'Hover over any point on the circle to reveal its information.';
+      canvas.style.cursor = 'default';
+    }
+
+    function handleCanvasClick(event) {
+      if (level !== 3 || !currentLevel3) return;
+      const clickedItem = getCirclePointFromMouse(event);
+      if (!clickedItem) return;
+
+      if (clickedItem.coord === currentLevel3.coord) {
+        score += 10;
+        level3Message.textContent = `Correct! That point is ${currentLevel3.deg}°, ${currentLevel3.rad}, ${currentLevel3.coord}.`;
+        level3Message.className = 'message correct';
+      } else {
+        level3Message.textContent = `Not quite. The correct point was ${currentLevel3.deg}°, ${currentLevel3.rad}, ${currentLevel3.coord}.`;
+        level3Message.className = 'message wrong';
+      }
+
+      questionNumber += 1;
+      drawCircle(currentLevel3);
+      updateStats();
+    }
+
+    function resetGame() {
+      score = 0;
+      questionNumber = 1;
+      if (level === 1) {
+        drawCircle();
+        legendBox.innerHTML = 'Hover over a point on the circle to reveal its angle information.';
+        level1InfoBox.innerHTML = 'Hover over any point on the circle to reveal its information.';
+      } else if (level === 2) {
+        nextQuestion();
+      } else {
+        nextLevel3Question();
+      }
+      updateStats();
+    }
+
+    document.getElementById('level1Btn').addEventListener('click', () => setLevel(1));
+    document.getElementById('level2Btn').addEventListener('click', () => setLevel(2));
+    document.getElementById('level3Btn').addEventListener('click', () => setLevel(3));
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+    document.getElementById('submitBtn').addEventListener('click', submitAnswer);
+    document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+    document.getElementById('nextLevel3Btn').addEventListener('click', nextLevel3Question);
+    canvas.addEventListener('mousemove', handleCanvasHover);
+    canvas.addEventListener('mouseleave', handleCanvasLeave);
+    canvas.addEventListener('click', handleCanvasClick);
+
+    drawCircle();
+    updateStats();
+  </script>
+</body>
+</html>
