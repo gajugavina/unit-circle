@@ -289,7 +289,7 @@
 
   <script>
     const unitCircleData = [
-      { deg: '0', rad: '0', coord: '(1, 0)', x: 1, y: 0, num: '', den: '', usePi: false },
+      { deg: '0', rad: '0 or 2π', coord: '(1, 0)', x: 1, y: 0, num: '', den: '', usePi: false },
       { deg: '30', rad: 'π/6', coord: '(√3/2, 1/2)', x: Math.sqrt(3)/2, y: 1/2, num: '1', den: '6', usePi: true },
       { deg: '45', rad: 'π/4', coord: '(√2/2, √2/2)', x: Math.sqrt(2)/2, y: Math.sqrt(2)/2, num: '1', den: '4', usePi: true },
       { deg: '60', rad: 'π/3', coord: '(1/2, √3/2)', x: 1/2, y: Math.sqrt(3)/2, num: '1', den: '3', usePi: true },
@@ -350,60 +350,121 @@
     }
 
     function drawCircle(highlight = null) {
-      const w = canvas.width;
-      const h = canvas.height;
-      const cx = w / 2;
-      const cy = h / 2;
-      const r = 155;
+  const w = canvas.width;
+  const h = canvas.height;
+  const cx = w / 2;
+  const cy = h / 2;
+  const r = 155;
 
-      ctx.clearRect(0, 0, w, h);
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#1e293b';
+  ctx.clearRect(0, 0, w, h);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#1e293b';
 
-      ctx.beginPath();
-      ctx.moveTo(cx, 30);
-      ctx.lineTo(cx, h - 30);
-      ctx.moveTo(30, cy);
-      ctx.lineTo(w - 30, cy);
-      ctx.stroke();
+  // Axes
+  ctx.beginPath();
+  ctx.moveTo(cx, 30);
+  ctx.lineTo(cx, h - 30);
+  ctx.moveTo(30, cy);
+  ctx.lineTo(w - 30, cy);
+  ctx.stroke();
 
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.stroke();
+  // Circle
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
 
-      ctx.font = '15px Arial';
-      ctx.fillStyle = '#334155';
-      ctx.fillText('(1,0)', cx + r - 5, cy - 10);
-      ctx.fillText('(-1,0)', cx - r - 55, cy - 10);
-      ctx.fillText('(0,1)', cx + 10, cy - r + 16);
-      ctx.fillText('(0,-1)', cx + 10, cy + r - 2);
+  // Draw all terminal arms lightly
+  unitCircleData.forEach(item => {
+    const px = cx + item.x * r;
+    const py = cy - item.y * r;
 
-      unitCircleData.forEach(item => {
-        const px = cx + item.x * r;
-        const py = cy - item.y * r;
-        ctx.beginPath();
-        ctx.fillStyle = '#64748b';
-        ctx.arc(px, py, 6, 0, Math.PI * 2);
-        ctx.fill();
-      });
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(100, 116, 139, 0.35)';
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(px, py);
+    ctx.stroke();
+  });
 
-      if (highlight) {
-        const px = cx + highlight.x * r;
-        const py = cy - highlight.y * r;
+  // Axis labels
+  ctx.font = 'bold 15px Arial';
+  ctx.fillStyle = '#334155';
+  ctx.fillText('y = sin', cx - 22, 22);
+  ctx.fillText('x = cos', w - 95, cy - 10);
 
-        ctx.beginPath();
-        ctx.strokeStyle = '#4f46e5';
-        ctx.lineWidth = 3;
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(px, py);
-        ctx.stroke();
+  // Point labels
+  ctx.font = '15px Arial';
+  ctx.fillText('(1,0)', cx + r - 5, cy - 10);
+  ctx.fillText('(-1,0)', cx - r - 55, cy - 10);
+  ctx.fillText('(0,1)', cx + 10, cy - r + 16);
+  ctx.fillText('(0,-1)', cx + 10, cy + r - 2);
 
-        ctx.beginPath();
-        ctx.fillStyle = '#4f46e5';
-        ctx.arc(px, py, 9, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
+  // Quadrant sign labels
+  ctx.font = 'bold 13px Arial';
+  ctx.fillStyle = '#0f172a';
+
+  // Q1
+  ctx.fillText('Q1', cx + 68, cy - 78);
+  ctx.fillText('sin +', cx + 58, cy - 58);
+  ctx.fillText('cos +', cx + 58, cy - 40);
+  ctx.fillText('tan +', cx + 58, cy - 22);
+  ctx.fillText('A', cx + 110, cy - 95);
+
+  // Q2
+  ctx.fillText('Q2', cx - 118, cy - 78);
+  ctx.fillText('sin +', cx - 128, cy - 58);
+  ctx.fillText('cos -', cx - 128, cy - 40);
+  ctx.fillText('tan -', cx - 128, cy - 22);
+  ctx.fillText('S', cx - 82, cy - 95);
+
+  // Q3
+  ctx.fillText('Q3', cx - 118, cy + 42);
+  ctx.fillText('sin -', cx - 128, cy + 62);
+  ctx.fillText('cos -', cx - 128, cy + 80);
+  ctx.fillText('tan +', cx - 128, cy + 98);
+  ctx.fillText('T', cx - 82, cy + 118);
+
+  // Q4
+  ctx.fillText('Q4', cx + 68, cy + 42);
+  ctx.fillText('sin -', cx + 58, cy + 62);
+  ctx.fillText('cos +', cx + 58, cy + 80);
+  ctx.fillText('tan -', cx + 58, cy + 98);
+  ctx.fillText('C', cx + 110, cy + 118);
+
+  // ASTC reminder
+  ctx.font = 'bold 14px Arial';
+  ctx.fillStyle = '#4f46e5';
+  ctx.fillText('ASTC', cx - 18, h - 14);
+
+  // Draw all points
+  unitCircleData.forEach(item => {
+    const px = cx + item.x * r;
+    const py = cy - item.y * r;
+
+    ctx.beginPath();
+    ctx.fillStyle = '#64748b';
+    ctx.arc(px, py, 6, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Highlight hovered/correct point and terminal arm
+  if (highlight) {
+    const px = cx + highlight.x * r;
+    const py = cy - highlight.y * r;
+
+    ctx.beginPath();
+    ctx.strokeStyle = '#4f46e5';
+    ctx.lineWidth = 4;
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(px, py);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.fillStyle = '#4f46e5';
+    ctx.arc(px, py, 9, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
 
     function setLevel(nextLevel) {
       level = nextLevel;
@@ -459,13 +520,24 @@
       const degreeCorrect = degGuess === currentQuestion.deg;
       let radianCorrect = false;
 
-      if (!currentQuestion.usePi) {
-        radianCorrect = normalize(zeroInput.value) === '0';
-      } else {
-        const numGuess = normalize(numInput.value);
-        const denGuess = normalize(denInput.value);
-        radianCorrect = numGuess === currentQuestion.num && denGuess === currentQuestion.den;
-      }
+      if (currentQuestion.deg === '0') {
+  const zeroGuess = normalize(zeroInput.value);
+  const numGuess = normalize(numInput.value);
+  const denGuess = normalize(denInput.value);
+
+  radianCorrect =
+    zeroGuess === '0' ||
+    (numGuess === '2' && denGuess === '1');
+
+} else if (!currentQuestion.usePi) {
+  radianCorrect = normalize(zeroInput.value) === '0';
+} else {
+  const numGuess = normalize(numInput.value);
+  const denGuess = normalize(denInput.value);
+  radianCorrect =
+    numGuess === currentQuestion.num &&
+    denGuess === currentQuestion.den;
+}
 
       if (degreeCorrect && radianCorrect) {
         score += 10;
@@ -505,7 +577,7 @@
         const px = cx + item.x * r;
         const py = cy - item.y * r;
         const distance = Math.hypot(mouseX - px, mouseY - py);
-        if (distance <= 14) return item;
+        if (distance <= 18) return item;
       }
       return null;
     }
